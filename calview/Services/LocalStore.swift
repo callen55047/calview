@@ -9,6 +9,8 @@ struct CalendarData: Codable {
     var events: [CalEvent] = []
     var legend: [LegendEntry] = []
     var shiftDays: [ShiftDay] = []
+    /// Shared Member profiles, keyed by Local User Id. Each Member edits only their own.
+    var profiles: [MemberProfile] = []
     /// Stable Member identity for this install, generated on first launch and stamped on authored Events.
     var localUserId: String = UUID().uuidString
     /// Watermark for the future sync engine: records with `updatedAt > lastSyncedAt` are pending.
@@ -16,6 +18,23 @@ struct CalendarData: Codable {
     var lastSyncedAt: Date? = nil
     /// Bump when the document shape changes in a way that needs migration.
     var schemaVersion: Int = 1
+
+    init() {}
+
+    // Synthesized `Decodable` throws on any missing key, so a document written
+    // before a field existed (e.g. `profiles`) would fail to load and silently
+    // wipe the UI. Decode every field with `decodeIfPresent` + its default so
+    // older documents migrate forward without a version bump.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        events = try c.decodeIfPresent([CalEvent].self, forKey: .events) ?? []
+        legend = try c.decodeIfPresent([LegendEntry].self, forKey: .legend) ?? []
+        shiftDays = try c.decodeIfPresent([ShiftDay].self, forKey: .shiftDays) ?? []
+        profiles = try c.decodeIfPresent([MemberProfile].self, forKey: .profiles) ?? []
+        localUserId = try c.decodeIfPresent(String.self, forKey: .localUserId) ?? UUID().uuidString
+        lastSyncedAt = try c.decodeIfPresent(Date.self, forKey: .lastSyncedAt)
+        schemaVersion = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
+    }
 }
 
 /// First-launch defaults. Only the Legend is seeded so Events can be created
@@ -65,7 +84,8 @@ actor LocalStore {
     /// Loads the document, seeding it on first launch (file absent).
     func load() throws -> CalendarData {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
-            let seeded = CalendarData(legend: Seed.defaultLegend)
+            var seeded = CalendarData()
+            seeded.legend = Seed.defaultLegend
             try persist(seeded)
             return seeded
         }

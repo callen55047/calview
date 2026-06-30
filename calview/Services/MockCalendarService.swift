@@ -6,6 +6,7 @@ final class MockCalendarService: CalendarService {
     private var events: [CalEvent] = Mock.events
     private var legend: [LegendEntry] = Mock.legend
     private var shiftDays: [ShiftDay] = Mock.shiftDays
+    private var profiles: [MemberProfile] = []
 
     func fetchEvents(for month: Date) async throws -> [CalEvent] {
         events.filter { Calendar.current.isDate($0.startDate, equalTo: month, toGranularity: .month) }
@@ -37,6 +38,18 @@ final class MockCalendarService: CalendarService {
             shiftDays[idx].isNightShift.toggle()
         } else {
             shiftDays.append(ShiftDay(id: id, date: Calendar.current.startOfDay(for: date), isNightShift: true))
+        }
+    }
+
+    func currentMemberId() async throws -> String { "preview" }
+
+    func fetchProfiles() async throws -> [MemberProfile] { profiles }
+
+    func saveProfile(_ profile: MemberProfile) async throws {
+        if let idx = profiles.firstIndex(where: { $0.id == profile.id }) {
+            profiles[idx] = profile
+        } else {
+            profiles.append(profile)
         }
     }
 }

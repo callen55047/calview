@@ -9,4 +9,7 @@ final class FirebaseCalendarService: CalendarService {
     func saveLegend(_ entries: [LegendEntry]) async throws {}
     func fetchShiftDays(for month: Date) async throws -> [ShiftDay] { [] }
     func toggleShiftDay(date: Date) async throws {}
+    func currentMemberId() async throws -> String { "" }
+    func fetchProfiles() async throws -> [MemberProfile] { [] }
+    func saveProfile(_ profile: MemberProfile) async throws {}
 }

@@ -70,4 +70,24 @@ final class LocalCalendarService: CalendarService {
             }
         }
     }
+
+    func currentMemberId() async throws -> String {
+        try await store.load().localUserId
+    }
+
+    func fetchProfiles() async throws -> [MemberProfile] {
+        try await store.load().profiles
+    }
+
+    func saveProfile(_ profile: MemberProfile) async throws {
+        try await store.mutate { doc in
+            var p = profile
+            p.updatedAt = Date()
+            if let idx = doc.profiles.firstIndex(where: { $0.id == p.id }) {
+                doc.profiles[idx] = p
+            } else {
+                doc.profiles.append(p)
+            }
+        }
+    }
 }

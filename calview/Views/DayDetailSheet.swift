@@ -73,8 +73,14 @@ struct EventRow: View {
                 .frame(width: 4, height: 40)
             VStack(alignment: .leading, spacing: 2) {
                 Text(event.title).font(.body)
-                Text(event.startDate, format: .dateTime.hour().minute())
-                    .font(.caption).foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text(event.startDate, format: .dateTime.hour().minute())
+                    if !event.location.isEmpty {
+                        Text("·")
+                        Text(event.location)
+                    }
+                }
+                .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
         }

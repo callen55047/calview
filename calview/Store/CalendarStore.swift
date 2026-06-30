@@ -5,6 +5,9 @@ final class CalendarStore {
     var events: [CalEvent] = []
     var legend: [LegendEntry] = []
     var shiftDays: [ShiftDay] = []
+    var profiles: [MemberProfile] = []
+    /// This install's Member id; identifies which profile is "mine".
+    var localUserId: String = ""
     var selectedDate: Date = Date()
     var displayedMonth: Date = Date()
 
@@ -19,9 +22,13 @@ final class CalendarStore {
             async let e = service.fetchEvents(for: displayedMonth)
             async let s = service.fetchShiftDays(for: displayedMonth)
             async let l = service.fetchLegend()
+            async let p = service.fetchProfiles()
+            async let uid = service.currentMemberId()
             events = try await e
             shiftDays = try await s
             legend = try await l
+            profiles = try await p
+            localUserId = try await uid
         } catch {}
     }
 
@@ -38,6 +45,23 @@ final class CalendarStore {
     func saveLegend(_ entries: [LegendEntry]) async {
         try? await service.saveLegend(entries)
         legend = entries
+    }
+
+    /// Ensures the two reserved Categories backing Day/Night shift Events exist,
+    /// creating any that are missing with their default colors. Idempotent —
+    /// called when Shift Work is enabled. Existing colors are left untouched.
+    func ensureShiftCategories() async {
+        let reserved = [
+            (ShiftWork.dayCategoryId, "Day Shift", ShiftWork.defaultDayHex),
+            (ShiftWork.nightCategoryId, "Night Shift", ShiftWork.defaultNightHex),
+        ]
+        var updated = legend
+        for (id, label, hex) in reserved where legendEntry(for: id) == nil {
+            updated.append(LegendEntry(id: id, label: label, hex: hex))
+        }
+        if updated.count != legend.count {
+            await saveLegend(updated)
+        }
     }
 
     func toggleShiftDay(date: Date) async {
@@ -73,5 +97,24 @@ final class CalendarStore {
 
     func legendEntry(for key: String) -> LegendEntry? {
         legend.first { $0.id == key }
+    }
+
+    /// The local Member's profile, or an empty one stamped with their id when not
+    /// yet set up (so the editor has something to seed from).
+    var myProfile: MemberProfile {
+        profiles.first { $0.id == localUserId } ?? MemberProfile(id: localUserId)
+    }
+
+    func profile(for id: String) -> MemberProfile? {
+        profiles.first { $0.id == id }
+    }
+
+    func saveProfile(_ profile: MemberProfile) async {
+        try? await service.saveProfile(profile)
+        if let idx = profiles.firstIndex(where: { $0.id == profile.id }) {
+            profiles[idx] = profile
+        } else {
+            profiles.append(profile)
+        }
     }
 }
