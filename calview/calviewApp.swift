@@ -1,32 +1,24 @@
-//
-//  calviewApp.swift
-//  calview
-//
-//  Created by Callen Egan on 2026-06-19.
-//
-
 import SwiftUI
-import SwiftData
 
 @main
 struct calviewApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @State private var store = makeStore()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(store)
         }
-        .modelContainer(sharedModelContainer)
     }
+}
+
+private func makeStore() -> CalendarStore {
+    // Offline Mode is read once at startup. In offline mode the backend service is
+    // never even instantiated, so the no-network guarantee is structural.
+    // Future: the online branch will wrap local + remote in a local-first
+    // SyncingCalendarService(local:remote:) so offline edits sync when connectivity returns.
+    let service: any CalendarService = AppConfig.isOfflineMode
+        ? LocalCalendarService()
+        : FirebaseCalendarService()
+    return CalendarStore(service: service)
 }

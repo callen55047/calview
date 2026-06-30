@@ -1,0 +1,100 @@
+# ─────────────────────────────────────────────────────────────
+# macOS
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# ─────────────────────────────────────────────────────────────
+# Xcode
+# ─────────────────────────────────────────────────────────────
+## Build generated
+build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+## Various per-user settings (keep the shared project, drop local state)
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+## Other
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+timeline.xctimeline
+playground.xcworkspace
+
+# ─────────────────────────────────────────────────────────────
+# Swift / Swift Package Manager
+# ─────────────────────────────────────────────────────────────
+.build/
+.swiftpm/
+Packages/
+Package.pins
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/.build/
+
+# ─────────────────────────────────────────────────────────────
+# CocoaPods / Carthage (if ever added)
+# ─────────────────────────────────────────────────────────────
+Pods/
+Carthage/Build/
+
+# ─────────────────────────────────────────────────────────────
+# AI agents & assistants (local config / caches / sessions)
+# NOTE: the committed docs AGENTS.md and CLAUDE.md are NOT ignored —
+# these patterns only match the dot-dirs/files below.
+# ─────────────────────────────────────────────────────────────
+# Claude / Claude Code
+.claude/
+.claude.json
+.claude-*/
+
+# Cursor
+.cursor/
+.cursorrules
+.cursorignore
+.cursor-tutor/
+
+# GitHub Copilot
+.copilot/
+
+# Windsurf / Codeium
+.windsurf/
+.codeium/
+
+# Aider
+.aider*
+.aider.tags.cache.v*/
+
+# Continue / Cody / Tabnine / other assistants
+.continue/
+.cody/
+.tabnine/
+
+# Generic agent scratch / local overrides
+.ai/
+*.local.json
+AGENTS.local.md
+
+# ─────────────────────────────────────────────────────────────
+# Editors / misc
+# ─────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*~
